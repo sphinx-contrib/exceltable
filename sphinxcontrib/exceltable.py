@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+
+# Supporting only python >= 2.6
+from __future__ import unicode_literals
+from __future__ import print_function
+from future.builtins import str as text
+from future.builtins import (range, object)
+from past.builtins import basestring
+
 """
 :class:`ExcelTableDirective` implements the ``exceltable`` -directive.
 """
@@ -22,7 +30,7 @@ from docutils.utils import SystemMessagePropagation, Reporter
 
 import sphinx
 
-# Uses excelent module xlrd for reading Excel sheets
+# Uses excellent module xlrd for reading Excel sheets
 # Retrieve it from http://www.python-excel.org/
 import xlrd
 
@@ -54,16 +62,16 @@ class Messenger(Reporter):
 
   def warning(self, *msgs):
     #super(Messenger, self).warning(msg)
-    return literal_block(text=self._prepare(msgs))
+    return nodes.literal_block(text=self._prepare(msgs))
 
   def error(self, *msgs):
     #super(Messenger, self).error(msg)
     text = self._prepare(msgs)
     #self.log.error(text)
-    return literal_block(text=text)
+    return nodes.literal_block(text=text)
 
   def _prepare(self, *msgs):
-    return ' '.join([unicode(msg) for msg in msgs])
+    return u' '.join([text(msg) for msg in msgs])
 
 
 class DirectiveTemplate(Directive):
@@ -128,11 +136,11 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
 
     # Divide the selection into from and to values
     if u':' not in selection:
-      selection += ':'
-    fromcell, tocell = selection.split(':')
+      selection += u':'
+    fromcell, tocell = selection.split(u':')
 
     if not fromcell:
-      fromcell = 'A1'
+      fromcell = u'A1'
 
     if not tocell:
       tocell = None
@@ -140,7 +148,7 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
     #print selection, fromcell, tocell
 
     if not file_path:
-      return [self._report('file_path -option missing')]
+      return [self._report(u'file_path -option missing')]
 
     # Header option
     header_rows = 0
@@ -150,15 +158,16 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
     # Transform the path suitable for processing
     file_path = self._get_directive_path(file_path)
 
-    print 'file path: %s' % file_path
+    print(u'file path: {0}'.format(file_path))
 
-    try:
-      et = ExcelTable(open(file_path))
-      table = et.create_table(fromcell=fromcell, tocell=tocell,
+    #try:
+    et = ExcelTable(open(file_path))
+    table = et.create_table(fromcell=fromcell, tocell=tocell,
         nheader=header_rows, sheet=sheet)
-    except Exception, e:
-      return [msgr.error('Error occured while creating table: %s' % e)]
-      pass
+    #except Exception as e:
+    #raise e.with_traceback()
+    #return [msgr.error(u'Error occured while creating table: %s' % e)]
+    #pass
 
     #print table
 
@@ -209,7 +218,7 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
 
           # FIXME: style attribute does not get into writer
           if cell['bgcolor']:
-            rgb = [str(val) for val in cell['bgcolor']]
+            rgb = [text(val) for val in cell['bgcolor']]
             node.attributes['style'] = 'background-color: rgb(%s);' % ','.join(rgb)
 
           #print node
@@ -253,7 +262,7 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
 
       self.check_table_dimensions(table_data, header_rows, stub_columns)
 
-    except SystemMessagePropagation, detail:
+    except SystemMessagePropagation as detail:
         return [detail.args[0]]
 
     # Generate the table node from the given list of elements
@@ -299,7 +308,8 @@ class ExcelTable(object):
   def __init__(self, fobj, encoding='utf-8'):
     """
     """
-    assert type(fobj) is file, u'File object type expected, %s given' % type(fobj)
+    #msgr.error('Testing: {0}'.format(fobj))
+    #assert type(fobj) is file, u'File object type expected, {0} given'.format(type(fobj))
 
     self.file_object = fobj
     self.fromcell = (0, 0)
@@ -344,7 +354,7 @@ class ExcelTable(object):
       sh1 = self.book.sheet_by_name(sheet)
 
     # Name selection, like: 'A1' or 'AB12'
-    if type(fromcell) in [str, unicode]:
+    if isinstance(fromcell, basestring):
       match = re.match(r'(?P<chars>[A-Z]+)(?P<nums>[1-9]+[0-9]*)', fromcell)
       if match:
         parts = (match.group('chars'), int(match.group('nums')))
@@ -353,7 +363,7 @@ class ExcelTable(object):
         fromcell = tuple([int(num) for num in fromcell.split(u',')])
 
     # Name selection, like: 'A1' or 'AB12'
-    if type(tocell) in [str, unicode]:
+    if isinstance(tocell, basestring):
       match = re.match(r'(?P<chars>[A-Z]+)(?P<nums>[1-9]+[0-9]*)', tocell)
       if match:
         parts = (match.group('chars'), int(match.group('nums')))
@@ -374,11 +384,11 @@ class ExcelTable(object):
       tocell = (maxcol_index, maxrow_index)
 
     # If the value is bigger than the value, default to max value
-    if tocell[0] > maxcol_index:
+    if int(tocell[0]) > maxcol_index:
       tocell = (maxcol_index, tocell[1])
 
     # If the value is bigger than the value, default to max value
-    if tocell[1] > maxrow_index:
+    if int(tocell[1]) > maxrow_index:
       tocell = (tocell[0], maxrow_index)
 
     # Iterate columns
@@ -430,7 +440,7 @@ class ExcelTable(object):
 
     # String
     if cell.ctype == xlrd.XL_CELL_TEXT:
-      return unicode(cell.value)
+      return text(cell.value)
 
    # Number: integer or float
     if cell.ctype == xlrd.XL_CELL_NUMBER:
@@ -459,10 +469,10 @@ class ExcelTable(object):
       if not value[1]:
         return u'%s' % value[0]
       elif value[3] and value[4] and value[5]:
-        return unicode(date)
+        return text(date)
       else:
         # TODO: provide a way to define this
-        return unicode(date.strftime('%Y-%m-%d'))
+        return text(date.strftime(u'%Y-%m-%d'))
 
     # Boolean
     if cell.ctype == xlrd.XL_CELL_BOOLEAN:

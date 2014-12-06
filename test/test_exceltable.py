@@ -6,6 +6,7 @@ import doctest
 import os
 import sys
 
+from future.builtins import (str, range, object)
 from sphinxcontrib import exceltable
 from sphinxcontrib.exceltable import toindex, toname
 
@@ -53,4 +54,3 @@ def unittests():
 
   # Test max value
   assert len(etable.create_table(nheader=0, fromcell=None, tocell='F9')['rows']) == 4
-  

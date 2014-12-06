@@ -11,21 +11,21 @@ Which is welcome, btw.
 
 .. index:: Building
 
+
+Getting started
+===============
+To get started with the development, follow the steps:
+
+- Install development-time dependencies::
+
+    pip install nose
+
+
 Building
 ========
-Project uses distribute Since the package already
-contains the dependencies to Paver, the basic building can be done as follows::
+Build project package with command::
 
-     python setup.py bdist_egg sdist_src
-
-However, installation of the paver is strongly suggested. After installation,
-the documentation, building and packaging can be all in once::
-
-     paver package
-
-To build just the documentation, run::
-
-  paver doc
+     python setup.py bdist_egg sdist
 
 
 .. index:: Testing

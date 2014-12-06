@@ -68,7 +68,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Exceltable'
-copyright = u'2008-2009, %s' % exceltable.__author__
+copyright = u'2008-2014, %s' % exceltable.__author__
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

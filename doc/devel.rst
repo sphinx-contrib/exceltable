@@ -25,8 +25,31 @@ Building
 ========
 Build project package with command::
 
-     python setup.py bdist_egg sdist
+     python setup.py sdist
 
+Releasing
+=========
+Steps to make a release:
+
+- Increase the version number (both setup.py and exceltable.py)
+- Run tox tests::
+
+    pip install tox
+    tox
+
+- Build documentation::
+
+    # NOTE: App runs only with py2
+    pip install sphinx-pypi-upload
+    python setup.py build_sphinx
+
+- Upload documentation
+
+    python setup.py upload_docs
+
+- Publish app
+
+    python setup.py sdist upload
 
 .. index:: Testing
 

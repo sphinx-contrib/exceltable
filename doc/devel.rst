@@ -31,7 +31,7 @@ Releasing
 =========
 Steps to make a release:
 
-- Increase the version number (both setup.py and exceltable.py)
+- Increase the version number (exceltable.py and CHANGES)
 - Run tox tests::
 
     pip install tox

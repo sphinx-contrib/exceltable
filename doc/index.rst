@@ -2,7 +2,7 @@
 Exceltable
 ==========
 Module ``sphinxcontrib.exceltable`` is an extension for Sphinx_, that adds support for including spreadsheets, or part
-of them, into Sphinx document.
+of them, into Sphinx document. It has been tested to run on both Python 2.7 and 3.4
 
 This is document describes :ref:`how to install <setup>`, :ref:`use <usage>` and :ref:`contribute to the development <devel>` of
 the :mod:`sphinxcontrib.exceltable` module.
@@ -19,9 +19,9 @@ Here you can find the minimum steps for installation and usage of the module:
 #. Install module along with its dependencies using `pip`, as follows. Alternatively, download the package and
    install it manually with command ``python setup.py install``::
 
-     pip install sphinxcontrib.exceltable
+     pip install sphinxcontrib-exceltable
 
-   .. NOTE:: Module depends on Sphinx_ and xlrd_ which are installed automatically.
+   .. NOTE:: The additional dependencies (Sphinx_, xlrd_, docutils_ and future_) are installed automatically.
 
 #. Start new Sphinx powered documentation project (unless you already have one)::
 

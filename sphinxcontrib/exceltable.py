@@ -12,7 +12,7 @@ from past.builtins import basestring
 """
 __docformat__ = 'restructuredtext'
 __author__ = 'Juha Mustonen'
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 import os
 import sys

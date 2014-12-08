@@ -2,8 +2,6 @@
 import os
 from setuptools import setup, find_packages
 
-from sphinxcontrib.exceltable import __version__
-
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'README.rst')) as stream:
   long_desc = stream.read()
 
@@ -11,7 +9,7 @@ requires = ['Sphinx>=0.6', 'xlrd', 'future', 'docutils']
 
 setup(
   name = 'sphinxcontrib-exceltable',
-  version = __version__,
+  version = '0.2.2',
   url = 'http://packages.python.org/sphinxcontrib-exceltable',
   download_url = 'http://pypi.python.org/pypi/sphinxcontrib-exceltable',
   license = 'BSD',

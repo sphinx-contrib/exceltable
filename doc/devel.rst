@@ -39,7 +39,7 @@ Steps to make a release:
 
 - Build documentation::
 
-    # NOTE: App runs only with py2
+    # NOTE: Sphinx-pypi-upload runs only with Python 2
     pip install sphinx-pypi-upload
     python setup.py build_sphinx
 

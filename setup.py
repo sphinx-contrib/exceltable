@@ -7,9 +7,11 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'README.rst'
 
 requires = ['Sphinx>=0.6', 'xlrd', 'future', 'docutils']
 
+VERSION = '0.2.2'
+
 setup(
   name = 'sphinxcontrib-exceltable',
-  version = '0.2.2',
+  version = VERSION,
   url = 'http://packages.python.org/sphinxcontrib-exceltable',
   download_url = 'http://pypi.python.org/pypi/sphinxcontrib-exceltable',
   license = 'BSD',

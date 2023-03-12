@@ -566,7 +566,7 @@ def setup(app):
   """
 
   # Sphinx 0.5 support
-  if '5' in sphinx.__version__.split('.'):
+  if '0.5' in '.'.join(sphinx.__version__.split('.')[:-1]): # 0.5.x (Ignore minor release)
     app.add_directive('exceltable', ExcelTableDirective, 0, (0, 0, 0))
   else:
     app.add_directive('exceltable', ExcelTableDirective)

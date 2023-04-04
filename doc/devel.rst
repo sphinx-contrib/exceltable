@@ -82,8 +82,7 @@ This section provides some further information about internals of the module:
 
 Licensing
 =========
-The software is licensed with liberal MIT license, making it suitable for both
-commercial and open source usage:
+The software is licensed with liberal MIT license, making it suitable for both commercial and open source usage:
 
     .. include:: ../LICENSE
 

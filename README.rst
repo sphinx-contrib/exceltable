@@ -15,4 +15,11 @@ Usage::
 Read complete documentation: http://pythonhosted.org/sphinxcontrib-exceltable/
 Report issues: http://bitbucket.org/birkenfeld/sphinx-contrib/
 
+Development::
+
+  # Install dependencies
+  python3 -m pip install --upgrade pip
+  # Run tests
+  PYTHONPATH=$(pwd) python3 -m pytest
+
 .. _Sphinx: http://sphinx.pocoo.org/

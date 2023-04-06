@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'README.rst')) as stream:
     long_desc = stream.read()
 
-requires = ['Sphinx>=0.6', 'xlrd', 'future', 'docutils']
+requires = ['Sphinx>=0.6', 'xlrd', 'docutils']
 
 VERSION = '0.3.0-dev'
 
@@ -37,6 +37,5 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=requires,
-    namespace_packages=['sphinxcontrib'],
     test_suite='nose.collector'
 )

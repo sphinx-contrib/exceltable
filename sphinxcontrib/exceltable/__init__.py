@@ -24,6 +24,9 @@ from docutils import nodes, utils, frontend
 from docutils.utils import SystemMessagePropagation, Reporter
 
 import sphinx
+from sphinx.util import logging
+from sphinx.application import Sphinx
+
 
 # Uses excellent module xlrd for reading Excel sheets
 # Retrieve it from http://www.python-excel.org/
@@ -560,7 +563,7 @@ def toname(colx, rowy):
     return col_name, rowy + 1
 
 
-def setup(app):
+def setup(app: Sphinx):
     """
     Extension setup, called by Sphinx
     """

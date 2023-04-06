@@ -7,7 +7,7 @@ with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'README.rst'
 
 requires = ['Sphinx>=0.6', 'xlrd', 'future', 'docutils']
 
-VERSION = '0.2.2'
+VERSION = '0.3.0-dev'
 
 setup(
     name='sphinxcontrib-exceltable',

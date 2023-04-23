@@ -222,9 +222,7 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
                     # FIXME: style attribute does not get into writer
                     if cell['bgcolor']:
                         rgb = [text(val) for val in cell['bgcolor']]
-                        node.attributes['style'] = 'background-color: rgb(%s);' % ','.join(rgb)
-
-                    # print node
+                        #node.attributes['style'] = 'background-color: rgb({});'.format(','.join(rgb))
 
                 table_data.append(row_data)
 

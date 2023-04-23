@@ -1,5 +1,31 @@
 Module ``sphinxcontrib.exceltable`` is an extension for Sphinx_, that adds support for including Excel spreadsheets, or part
-of them, into Sphinx document. See documentation for further information. It has been tested to run on both Python 2.7 and 3.4
+of them, into Sphinx document. See documentation for further information. It works with Python >=3.7
+
+Installation::
+
+    mkdir my-docs
+    cd my-docs/
+
+    # Install dependencies
+    python3 -v venv
+    source vevn/bin/activate
+    pip3 install sphinx sphinxcontrib-exceltable
+
+    # Alternatively, install pre-release
+    # pip3 install sphinxcontrib-exceltable --pre
+
+    # Create simple docs
+    sphinx-quickstart
+
+Configuration:
+
+Enable the extension by adding ::
+
+
+  extensions = [
+    'sphinxcontrib.exceltable'
+    # ...other extensions
+  ]
 
 Usage::
 
@@ -13,13 +39,22 @@ Usage::
      :selection: A1:B3
 
 Read complete documentation: http://pythonhosted.org/sphinxcontrib-exceltable/
-Report issues: http://bitbucket.org/birkenfeld/sphinx-contrib/
+Report issues: https://github.com/sphinx-contrib/exceltable/issues
 
 Development::
 
+  # Create virtual environment
+  python3 -m venv venv3
+  source venv3/bin/activate
+
   # Install dependencies
   python3 -m pip install --upgrade pip
-  # Run tests
-  PYTHONPATH=$(pwd) python3 -m pytest
+  pip3 install -r requirements.txt
 
-.. _Sphinx: http://sphinx.pocoo.org/
+  # Run tests
+  PYTHONPATH=$(pwd)/src python3 -m pytest
+
+  # Run
+  python3 -m tox
+
+.. _Sphinx: https://www.sphinx-doc.org/

@@ -32,25 +32,6 @@ extensions = [
     'sphinxcontrib.exceltable',
 ]
 
-if sphinx.__version__.startswith('1.0'):
-    extensions.append('sphinx.ext.extlinks')
-    extlinks = {'issue': ('http://bitbucket.org/jmu/sphinxcontrib/issue/', 'issue ')}
-
-# Add pdfbuilder if rst2pdf is available
-try:
-    from rst2pdf import pdfbuilder
-
-    extensions.append('rst2pdf.pdfbuilder')
-
-    pdf_documents = [
-        ('index', 'sphinxcontrib.exceltable.alt', u'Sphinx-contrib Exceltable documentation',
-         u'Juha Mustonen'),
-    ]
-    pdf_stylesheets = ['sphinx', 'kerning']
-    pdf_break_level = 1
-except ImportError:
-    pass
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['static', '.templates']
 
@@ -65,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Exceltable'
-copyright = u'2008-2014, Juha Mustonen'
+copyright = u'2008-2023, Juha Mustonen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -230,7 +211,8 @@ latex_use_modindex = False
 
 
 def setup(app):
-    app.add_description_unit('confval', 'confval', 'pair: %s; configuration value')
-    app.add_description_unit('bug', 'bug', 'pair: %s; bug')
-    app.add_description_unit('task', 'task', 'pair: %s; task')
-    app.add_description_unit('issue', 'issue', 'pair: %s; issue')
+    pass
+    # app.add_description_unit('confval', 'confval', 'pair: %s; configuration value')
+    # app.add_description_unit('bug', 'bug', 'pair: %s; bug')
+    # app.add_description_unit('task', 'task', 'pair: %s; task')
+    # app.add_description_unit('issue', 'issue', 'pair: %s; issue')

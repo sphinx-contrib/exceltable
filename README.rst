@@ -1,5 +1,10 @@
-Module ``sphinxcontrib.exceltable`` is an extension for Sphinx_, that adds support for including Excel spreadsheets, or part
-of them, into Sphinx document. See documentation for further information. It works with Python >=3.7
+Module ``sphinxcontrib.exceltable`` is an extension for Sphinx_, which allows to include Excel spreadsheets into beautiful Sphinx -generated documents. 
+It is possible to include the whole spreadsheet or just a part of it. 
+
+The extension is compatible with xls, xlsx, xlsm, xltx, xltm, xlsb, ods, odt, and odf files. 
+It can also control the formatting of headers and width of the columns. 
+
+See documentation for further information. It works with Python >=3.7.
 
 Installation::
 

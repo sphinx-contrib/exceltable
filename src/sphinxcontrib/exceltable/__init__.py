@@ -170,10 +170,9 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
         file_path = self._get_directive_path(file_path)
         if sheet.isdigit():
             sheet = int(sheet)
-        df = pd.read_excel(file_path, sheet_name=sheet, header=None, index_col=None)
 
         # try:
-        et = ExcelTable(file_path, df)
+        et = ExcelTable(file_path)
         table = et.create_table(fromcell=fromcell, tocell=tocell,
                                 nheader=header_rows, widths=col_widths, 
                                 sheet=sheet)
@@ -318,13 +317,13 @@ class ExcelTable(object):
 
     """
 
-    def __init__(self, filepath, df):
+    def __init__(self, filepath):
         """
         """
         self.filepath = filepath
         self.fromcell = (0, 0)
         self.tocell = (0, 0)
-        self.df = df
+        self.df = None
 
 
     def create_table(self, fromcell=None, tocell=None, nheader=0, widths=[], sheet=0):
@@ -377,8 +376,8 @@ class ExcelTable(object):
         skiprows = fromcell[1] if fromcell else None
         self.df = pd.read_excel(self.filepath, sheet_name=sheet, header=None, index_col=None, usecols=usecols, skiprows=skiprows)
 
-        # Choose the first column based on fromcell
-        if fromcell:
+        # Choose the first column based on fromcell if usecols not used.
+        if not usecols and fromcell:
             self.df = self.df.iloc[:, fromcell[0]:]
 
         # Relabel columns to 0, 1, 2, ...
@@ -476,7 +475,12 @@ def toname(colx, rowy):
     """
     Opposite to `toindex`
     """
-    col_name = xlrd.colname(colx)
+    # Convert int colx into a Excel column name
+    # e.g. 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB
+    col_name = ''
+    while colx >= 0:
+        col_name = chr(ord('A') + colx % 26) + col_name
+        colx = int(colx / 26) - 1
     return col_name, rowy + 1
 
 

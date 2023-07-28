@@ -10,7 +10,7 @@
 :class:`ExcelTableDirective` implements the ``exceltable`` -directive.
 """
 __docformat__ = 'restructuredtext'
-__author__ = 'Juha Mustonen'
+__author__ = 'Juha Mustonen and Saptak Das'
 
 import os
 import re
@@ -28,9 +28,17 @@ from sphinx.util import logging
 from sphinx.application import Sphinx
 
 
-# Uses excellent module xlrd for reading Excel sheets
-# Retrieve it from http://www.python-excel.org/
-import xlrd
+# Uses Pandas (xlrd, openpyxl, odfpy, or pyxlsb) to support reading from local filesystem or URL. Pandas supports all formats below:
+# * Excel 97-2003 Workbook (.xls)
+# * Excel Workbook (.xlsx)
+# * Excel Macro-Enabled Workbook (.xlsm)
+# * Excel Workbook Template (.xltx)
+# * Excel Macro-Enabled Workbook Template (.xltm)
+# * Excel Binary Workbook (.xlsb)
+# * OpenDocument Spreadsheet (.ods)
+# * OpenDocument Text (.odt)
+# * OpenDocument Formula (.odf)
+import pandas as pd
 
 basestring = (str, bytes)
 
@@ -120,11 +128,10 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
     option_spec = {
         'file': directives.path,
         'selection': directives.unchanged_required,
-        'encoding': directives.unchanged,
         'header': directives.unchanged,
         'sheet': directives.unchanged,
         'class': directives.class_option,
-        'widths': directives.unchanged,
+        'widths': directives.unchanged
     }
 
     def run(self):
@@ -133,10 +140,10 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
         """
         # Get content and options
         file_path = self.options.get('file', None)
-        selection = self.options.get('selection', 'A1:')
+        selection = self.options.get('selection', ':')
         sheet = self.options.get('sheet', '0')
         header = self.options.get('header', '0')
-        col_widths = self.options.get('widths', None)
+        col_widths = self.options.get('widths', [])
 
         # Divide the selection into from and to values
         if u':' not in selection:
@@ -144,7 +151,7 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
         fromcell, tocell = selection.split(u':')
 
         if not fromcell:
-            fromcell = u'A1'
+            fromcell = None
 
         if not tocell:
             tocell = None
@@ -161,13 +168,14 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
 
         # Transform the path suitable for processing
         file_path = self._get_directive_path(file_path)
-
-        print(u'file path: {0}'.format(file_path))
+        if sheet.isdigit():
+            sheet = int(sheet)
 
         # try:
-        et = ExcelTable(open(file_path))
+        et = ExcelTable(file_path)
         table = et.create_table(fromcell=fromcell, tocell=tocell,
-                                nheader=header_rows, sheet=sheet)
+                                nheader=header_rows, widths=col_widths, 
+                                sheet=sheet)
         # except Exception as e:
         # raise e.with_traceback()
         # return [msgr.error(u'Error occurred while creating table: %s' % e)]
@@ -207,10 +215,10 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
                     # Node based on formatting rules
                     # NOTE: rst does not support nested, use class attribute instead
 
-                    if cell['italic']:
+                    if cell.get('italic', False):
                         class_data.append('italic')
 
-                    if cell['bold']:
+                    if cell.get('bold', False):
                         node = nodes.strong(text=cell['value'])
                     else:
                         node = nodes.paragraph(text=cell['value'])
@@ -220,7 +228,7 @@ class ExcelTableDirective(ListTable, DirectiveTemplate):
                     row_data.append([node])
 
                     # FIXME: style attribute does not get into writer
-                    if cell['bgcolor']:
+                    if cell.get('bgcolor', None):
                         rgb = [text(val) for val in cell['bgcolor']]
                         #node.attributes['style'] = 'background-color: rgb({});'.format(','.join(rgb))
 
@@ -309,23 +317,16 @@ class ExcelTable(object):
 
     """
 
-    def __init__(self, fobj, encoding='utf-8'):
+    def __init__(self, filepath):
         """
         """
-        # msgr.error('Testing: {0}'.format(fobj))
-        # assert type(fobj) is file, u'File object type expected, {0} given'.format(type(fobj))
-
-        self.file_object = fobj
+        self.filepath = filepath
         self.fromcell = (0, 0)
         self.tocell = (0, 0)
+        self.df = None
 
-        # xlrd uses paths only
-        # TODO: Add support for remote files
-        self.book = xlrd.open_workbook(self.file_object.name,
-                                       encoding_override=encoding,
-                                       formatting_info=True)
 
-    def create_table(self, fromcell=None, tocell=None, nheader=0, sheet=0):
+    def create_table(self, fromcell=None, tocell=None, nheader=0, widths=[], sheet=0):
         """
         Creates a table (as a list) based on given query and columns
 
@@ -334,27 +335,24 @@ class ExcelTable(object):
           is from the beginning of the data set (0, 0).
 
         tocell:
-          The index of the cell where to end the selection.
-          Default is in the end of the data set.
+          The index of the cell where to end. The default
+          is to the end of the data set.
 
         nheader:
           Number of lines which are considered as a header lines.
           Normally, the value is 0 (default) or 1.
 
+        widths:
+          List of widths for the columns. The default is to use
+          equal widths for all columns.
+
         sheet:
           Name or index of the sheet as string/unicode. The index starts from the 0
-          and is the default value. If numeric value is given, provide it in format::
+          and is the default value.
 
-            et.create_table(fromcell='A1', tocell='B2', sheet='2')
-
+          et.create_table(fromcell='A1', tocell='C4', nheader=1, widths=[40, 30, 30], sheet='Sheet1', date_format='%Y-%m-%d')
         """
         rows = []
-
-        # Select sheet by given index or name
-        if type(sheet) is int or sheet.isdigit():
-            sh1 = self.book.sheet_by_index(int(sheet))
-        else:
-            sh1 = self.book.sheet_by_name(sheet)
 
         # Name selection, like: 'A1' or 'AB12'
         if isinstance(fromcell, basestring):
@@ -374,25 +372,26 @@ class ExcelTable(object):
             else:
                 tocell = tuple([int(num) for num in tocell.split(u',')])
 
+        usecols = list(range(fromcell[0], tocell[0] + 1)) if fromcell and tocell else None
+        skiprows = fromcell[1] if fromcell else None
+        self.df = pd.read_excel(self.filepath, sheet_name=sheet, header=None, index_col=None, usecols=usecols, skiprows=skiprows)
+
+        # Choose the first column based on fromcell if usecols not used.
+        if not usecols and fromcell:
+            self.df = self.df.iloc[:, fromcell[0]:]
+
+        # Relabel columns to 0, 1, 2, ...
+        self.df.columns = list(range(len(self.df.columns)))
+
+        # Cut the df to the correct size
+        if fromcell and tocell:
+            self.df = self.df.iloc[:tocell[1] - fromcell[1] + 1, :]
+
+        # Update fromcell and tocell if not given
         if not fromcell:
             fromcell = (0, 0)
-
-        # If ending cell is not given, calculate
-        # it from rows and cols
-        # print sh1.ncols, sh1.nrows
-        # print (tocell[0] > (sh1.ncols -1)) or (tocell[1] > (sh1.nrows -1))
-        maxrow_index = sh1.nrows - 1
-        maxcol_index = sh1.ncols - 1
         if not tocell:
-            tocell = (maxcol_index, maxrow_index)
-
-        # If the value is bigger than the value, default to max value
-        if int(tocell[0]) > maxcol_index:
-            tocell = (maxcol_index, tocell[1])
-
-        # If the value is bigger than the value, default to max value
-        if int(tocell[1]) > maxrow_index:
-            tocell = (tocell[0], maxrow_index)
+            tocell = (fromcell[0] + len(self.df.columns) - 1, fromcell[1] + len(self.df.index) - 1)
 
         # Iterate columns
         rows = {'headers': [], 'rows': []}
@@ -402,23 +401,28 @@ class ExcelTable(object):
             # Iterate rows within column
             cols = []
             for cnum in range(fromcell[0], tocell[0] + 1):
-                cell = sh1.cell(row_num, cnum)
-                width = sh1.computed_column_width(cnum)
-
-                # Put data
-                cell_data = {'type': 'row', 'width': width, 'value': self._get_value(cell)}
+                # Value will always be determined from pandas.
+                value = self.df.iloc[row_num - fromcell[1], cnum - fromcell[0]]
+                width = widths[cnum - fromcell[0]] if len(widths) == tocell[0] + 1 - fromcell[0] else 0
+                if width == 0:
+                    width = 20 # Default width if not specified
+                cell_data = {'type': 'row', 'width': width, 'value': value}
 
                 # If header row
                 if row_num < nheader:
                     cell_data['type'] = 'header'
 
                 # Get more format info for the cell
-                cell_data.update(self._get_formatting(cell))
+                # TODO: Can add formatting for specific file types using various engines later.
+                # cell_data.update(self._get_formatting(cell))
 
                 cols.append(cell_data)
 
-            # If first column is header, their all headers - i think
+            # The first column is assumed to be all headers.
             if cols[0]['type'] == 'header':
+                # Make columns bolded.
+                for col in cols:
+                    col['bold'] = True
                 rows['headers'].append(cols)
             else:
                 rows['rows'].append(cols)
@@ -430,93 +434,7 @@ class ExcelTable(object):
         # Store into object for validation purposes
         self.fromcell = fromcell
         self.tocell = tocell
-
         return rows
-
-    def _get_value(self, cell):
-        """
-        Returns the value of the xlrd Cell, based
-        on type.
-        """
-        # String
-        if cell.ctype == xlrd.XL_CELL_TEXT:
-            return text(cell.value)
-
-        # Number: integer or float
-        if cell.ctype == xlrd.XL_CELL_NUMBER:
-            # There is no separation between integers
-            # and other numbers. Show it as integer if
-            # it seems like a one.
-            # NOTE: float.is_integer is available only in python 2.6 and above
-            if int(cell.value) == cell.value:
-                return u'%s' % int(cell.value)
-            return u'%s' % cell.value
-
-        # Date type
-        if cell.ctype == xlrd.XL_CELL_DATE:
-            value = xlrd.xldate_as_tuple(cell.value, 0)
-
-            date = datetime(
-                year=value[0],
-                month=value[1],
-                day=value[2],
-                hour=value[3],
-                minute=value[4],
-                second=value[5],
-            )
-
-            # Show more accurate value only if it exists
-            if not value[1]:
-                return u'%s' % value[0]
-            elif value[3] and value[4] and value[5]:
-                return text(date)
-            else:
-                # TODO: provide a way to define this
-                return text(date.strftime(u'%Y-%m-%d'))
-
-        # Boolean
-        if cell.ctype == xlrd.XL_CELL_BOOLEAN:
-            if cell.value:
-                return u'True'
-            return u'False'
-
-        # Error
-        if cell.ctype == xlrd.XL_CELL_ERROR:
-            return u'Error'
-
-        return u''
-
-    def _get_formatting(self, cell):
-        """
-        Returns some format related information
-        about the given cell. The information is
-        required/handy when creating the table
-
-        cell:
-          Cell object where to get formatting for
-
-        Returns:
-          dictionary containing the formatting information
-        """
-        format = {'bold': False, 'italic': False, 'bgcolor': None}
-
-        xf = self.book.xf_list[cell.xf_index]
-        font = self.book.font_list[xf.font_index]
-
-        # Weight: 400 (normal), 700 (bold)
-        if font.weight > 400:
-            format['bold'] = True
-
-        # Collect italic info
-        if font.italic:
-            format['italic'] = True
-
-        # Get bg color
-        bgcolor = self.book.colour_map[xf.background.background_colour_index]
-        if bgcolor:
-            format['bgcolor'] = bgcolor
-
-        return format
 
 
 def toindex(col, row):
@@ -557,7 +475,12 @@ def toname(colx, rowy):
     """
     Opposite to `toindex`
     """
-    col_name = xlrd.colname(colx)
+    # Convert int colx into a Excel column name
+    # e.g. 0 -> A, 1 -> B, ..., 25 -> Z, 26 -> AA, 27 -> AB
+    col_name = ''
+    while colx >= 0:
+        col_name = chr(ord('A') + colx % 26) + col_name
+        colx = int(colx / 26) - 1
     return col_name, rowy + 1
 
 

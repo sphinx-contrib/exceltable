@@ -22,7 +22,7 @@ def test_directive():
     unittests against the module
     """
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../doc/example/cartoons.xls'))
-    excel_table = exceltable.ExcelTable(open(path, 'r+b'))
+    excel_table = exceltable.ExcelTable(path)
 
     # Load 2x2 part from 2nd sheet
     quad = excel_table.create_table(sheet=1, fromcell='B2', tocell='C3')
@@ -41,4 +41,4 @@ def test_directive():
     assert toindex('AB', 5) == (27, 4)
 
     # Test max value
-    assert len(excel_table.create_table(nheader=0, fromcell=None, tocell='F9')['rows']) == 4
+    assert len(excel_table.create_table(nheader=1, sheet=1, fromcell='B2', tocell=None)['rows']) == 2

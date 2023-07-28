@@ -12,11 +12,14 @@
 # serve to show the default.
 
 import sphinx
+import sys
+import os
 
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
 # absolute, like shown here.
-# sys.path.append(os.path.abspath('.'))
+sys.path.append(os.path.abspath('../src/'))
+
 
 # General configuration
 # ---------------------
@@ -29,7 +32,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
     'sphinx.ext.todo',
-    'sphinxcontrib.exceltable',
+    'sphinxcontrib.exceltable'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

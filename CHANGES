@@ -1,3 +1,8 @@
+Release 0.4.0 (next release)
+----------------------------
+- Added support for multiple formats: xls, xlsx, xlsm, xltx, xltm, xlsb, ods, odt, and odf
+- Using [Pandas](https://pandas.pydata.org/) for reading files
+
 Release 0.3.0 (2023-07-28)
 ----------------------------
 - Fixed code formatting
